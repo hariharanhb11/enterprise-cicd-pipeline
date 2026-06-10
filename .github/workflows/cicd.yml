@@ -1,0 +1,95 @@
+name: Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: enterprise-cicd-app
+
+jobs:
+
+  build-test-scan-deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.11
+
+    - name: Install Dependencies
+      run: |
+        pip install flask pytest
+
+    - name: Run Unit Tests
+      run: |
+        pytest
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build Docker Image
+      run: |
+        docker build -t $ECR_REPOSITORY:${{ github.sha }} .
+
+    - name: Trivy Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+        format: table
+        exit-code: 1
+        ignore-unfixed: true
+        vuln-type: os,library
+        severity: CRITICAL,HIGH
+
+    - name: Tag Docker Image
+      run: |
+        docker tag $ECR_REPOSITORY:${{ github.sha }} \
+        ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
+
+    - name: Push Docker Image
+      run: |
+        docker push \
+        ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
+
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v4
+
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig \
+        --region us-east-1 \
+        --name practice-eks
+
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install myapp ./helm/myapp \
+        --set image.repository=${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY \
+        --set image.tag=${{ github.sha }}
+
+    - name: Smoke Test
+      run: |
+        kubectl get pods

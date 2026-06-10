@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enterprise CI/CD Pipeline</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Enterprise CI/CD Pipeline</h1>
+
+    <div class="card">
+        <h2>Deployment Status</h2>
+        <p>Application Successfully Deployed to Kubernetes</p>
+    </div>
+
+    <div class="card">
+        <h2>Pipeline Information</h2>
+
+        <table>
+            <tr>
+                <td>Environment</td>
+                <td>{{ environment }}</td>
+            </tr>
+
+            <tr>
+                <td>Application Version</td>
+                <td>{{ version }}</td>
+            </tr>
+
+            <tr>
+                <td>Pod Hostname</td>
+                <td>{{ hostname }}</td>
+            </tr>
+
+            <tr>
+                <td>Deployment Time</td>
+                <td>{{ time }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2>Integrated DevOps Tools</h2>
+
+        <ul>
+            <li>GitHub Actions</li>
+            <li>Docker</li>
+            <li>SonarQube</li>
+            <li>Trivy</li>
+            <li>AWS ECR</li>
+            <li>Kubernetes</li>
+            <li>Helm</li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>
