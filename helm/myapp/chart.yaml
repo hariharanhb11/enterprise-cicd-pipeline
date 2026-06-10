@@ -1,6 +1,7 @@
 apiVersion: v2
 name: myapp
-description: Flask Enterprise CI/CD App
+description: Enterprise CI/CD Flask Application
 type: application
 version: 0.1.0
 appVersion: "1.0"
+
