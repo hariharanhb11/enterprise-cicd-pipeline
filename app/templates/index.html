@@ -1,58 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enterprise CI/CD Pipeline</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
 
 <div class="container">
 
-    <h1>Enterprise CI/CD Pipeline</h1>
-
-    <div class="card">
-        <h2>Deployment Status</h2>
-        <p>Application Successfully Deployed to Kubernetes</p>
+    <div class="header">
+        <h1>🚀 Enterprise CI/CD Pipeline</h1>
+        <p>GitHub Actions • Docker • SonarQube • Trivy • EKS • Helm</p>
     </div>
 
-    <div class="card">
-        <h2>Pipeline Information</h2>
+    <div class="grid">
 
-        <table>
-            <tr>
-                <td>Environment</td>
-                <td>{{ environment }}</td>
-            </tr>
+        <div class="card">
+            <h2>Deployment Status</h2>
+            <p class="success">SUCCESSFULLY DEPLOYED</p>
+        </div>
 
-            <tr>
-                <td>Application Version</td>
-                <td>{{ version }}</td>
-            </tr>
+        <div class="card">
+            <h2>Environment</h2>
+            <p>{{ environment }}</p>
+        </div>
 
-            <tr>
-                <td>Pod Hostname</td>
-                <td>{{ hostname }}</td>
-            </tr>
+        <div class="card">
+            <h2>Application Version</h2>
+            <p>{{ version }}</p>
+        </div>
 
-            <tr>
-                <td>Deployment Time</td>
-                <td>{{ time }}</td>
-            </tr>
-        </table>
-    </div>
+        <div class="card">
+            <h2>Kubernetes Pod</h2>
+            <p>{{ hostname }}</p>
+        </div>
 
-    <div class="card">
-        <h2>Integrated DevOps Tools</h2>
+        <div class="card">
+            <h2>Deployment Time</h2>
+            <p>{{ current_time }}</p>
+        </div>
 
-        <ul>
-            <li>GitHub Actions</li>
-            <li>Docker</li>
-            <li>SonarQube</li>
-            <li>Trivy</li>
-            <li>AWS ECR</li>
-            <li>Kubernetes</li>
-            <li>Helm</li>
-        </ul>
+        <div class="card">
+            <h2>Pipeline Stages</h2>
+            <ul>
+                <li>✔ Code Checkout</li>
+                <li>✔ Unit Testing</li>
+                <li>✔ SonarQube Analysis</li>
+                <li>✔ Docker Build</li>
+                <li>✔ Trivy Security Scan</li>
+                <li>✔ Push to ECR</li>
+                <li>✔ Helm Deployment</li>
+            </ul>
+        </div>
+
     </div>
 
 </div>
