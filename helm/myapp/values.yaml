@@ -4,6 +4,8 @@ image:
   repository: nginx
   tag: latest
 
+containerPort: 5000
+
 env:
   APP_VERSION: dev
   DEPLOY_TIME: not-set
