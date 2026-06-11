@@ -1,15 +1,14 @@
 replicaCount: 2
 
 image:
-  repository: ""
-  tag: ""
+  repository: nginx
+  tag: latest
+
+env:
+  APP_VERSION: dev
+  DEPLOY_TIME: not-set
+  ENVIRONMENT: Practice
 
 service:
   type: LoadBalancer
   port: 80
-
-containerPort: 5000
-
-env:
-  ENVIRONMENT: Production
-  APP_VERSION: "1.0.0"

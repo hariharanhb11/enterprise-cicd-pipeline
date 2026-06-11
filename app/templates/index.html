@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enterprise CI/CD Pipeline</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -18,9 +16,9 @@
 
     <div class="grid">
 
-        <div class="card">
+        <div class="card success">
             <h2>Deployment Status</h2>
-            <p class="success">SUCCESSFULLY DEPLOYED</p>
+            <p>SUCCESSFULLY DEPLOYED</p>
         </div>
 
         <div class="card">
@@ -35,30 +33,32 @@
 
         <div class="card">
             <h2>Kubernetes Pod</h2>
-            <p>{{ hostname }}</p>
+            <p>{{ pod_name }}</p>
         </div>
 
         <div class="card">
             <h2>Deployment Time</h2>
-            <p>{{ current_time }}</p>
+            <p>{{ deploy_time }}</p>
         </div>
 
-        <div class="card">
-            <h2>Pipeline Stages</h2>
-            <ul>
-                <li>✔ Code Checkout</li>
-                <li>✔ Unit Testing</li>
-                <li>✔ SonarQube Analysis</li>
-                <li>✔ Docker Build</li>
-                <li>✔ Trivy Security Scan</li>
-                <li>✔ Push to ECR</li>
-                <li>✔ Helm Deployment</li>
-            </ul>
-        </div>
+    </div>
 
+    <div class="pipeline">
+        <h2>Pipeline Stages</h2>
+
+        <ul>
+            <li>✔ Code Checkout</li>
+            <li>✔ Unit Testing</li>
+            <li>✔ SonarQube Analysis</li>
+            <li>✔ Docker Build</li>
+            <li>✔ Trivy Security Scan</li>
+            <li>✔ Push to ECR</li>
+            <li>✔ Helm Deployment</li>
+        </ul>
     </div>
 
 </div>
 
 </body>
 </html>
+

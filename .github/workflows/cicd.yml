@@ -12,94 +12,101 @@ env:
   EKS_CLUSTER_NAME: practice-eks
 
 jobs:
-
   build-test-deploy:
-
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+      - name: Install Dependencies
+        run: |
+          pip install -r app/requirements.txt
 
-    - name: Install Dependencies
-      run: |
-        pip install -r app/requirements.txt
+      - name: Run Unit Tests
+        run: |
+          pytest app/test_app.py
 
-    - name: Run Unit Tests
-      run: |
-        pytest app/test_app.py
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-    - name: SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@master
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
+      - name: Build Docker Image
+        run: |
+          docker build -t $ECR_REPOSITORY:${{ github.sha }} .
 
-    - name: Build Docker Image
-      run: |
-        docker build -t $ECR_REPOSITORY:${{ github.sha }} .
+      - name: Trivy Security Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          format: table
+          exit-code: 0
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
 
-    - name: Trivy Security Scan
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: ${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-        format: table
-        exit-code: 0
-        ignore-unfixed: true
-        vuln-type: os,library
-        severity: HIGH,CRITICAL
+      - name: Tag Docker Image
+        run: |
+          docker tag $ECR_REPOSITORY:${{ github.sha }} \
+            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
 
-    - name: Tag Docker Image
-      run: |
-        docker tag $ECR_REPOSITORY:${{ github.sha }} \
-        ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
+      - name: Push Docker Image to ECR
+        run: |
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
 
-    - name: Push Docker Image to ECR
-      run: |
-        docker push \
-        ${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY:${{ github.sha }}
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
 
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v4
 
-    - name: Install Helm
-      uses: azure/setup-helm@v4
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region $AWS_REGION \
+            --name $EKS_CLUSTER_NAME
 
-    - name: Update kubeconfig
-      run: |
-        aws eks update-kubeconfig \
-        --region $AWS_REGION \
-        --name $EKS_CLUSTER_NAME
+      - name: Deploy Application using Helm
+        run: |
+          helm upgrade --install myapp ./helm/myapp \
+            --set image.repository=${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY \
+            --set image.tag=${{ github.sha }} \
+            --set env.APP_VERSION=${{ github.sha }} \
+            --set env.ENVIRONMENT=Production \
+            --set env.DEPLOY_TIME="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-    - name: Deploy Application using Helm
-      run: |
-        helm upgrade --install myapp ./helm/myapp \
-        --set image.repository=${{ steps.login-ecr.outputs.registry }}/$ECR_REPOSITORY \
-        --set image.tag=${{ github.sha }} \
-        --set env.APP_VERSION=${{ github.sha }}
+      - name: Verify Deployment
+        run: |
+          kubectl get pods
+          kubectl get svc
 
-    - name: Verify Deployment
-      run: |
-        kubectl get pods
-        kubectl get svc
+      - name: Smoke Test
+        run: |
+          kubectl rollout status deployment/myapp --timeout=300s
 
-    - name: Smoke Test
-      run: |
-        kubectl rollout status deployment/myapp
+          kubectl wait \
+            --for=condition=available \
+            deployment/myapp \
+            --timeout=300s
+
+          kubectl get pods
+          kubectl get svc

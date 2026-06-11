@@ -18,26 +18,28 @@ spec:
 
     spec:
       containers:
-      - name: myapp
+        - name: myapp
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.containerPort }}
 
-        ports:
-        - containerPort: {{ .Values.containerPort }}
+          env:
+            - name: APP_VERSION
+              value: "{{ .Values.env.APP_VERSION }}"
 
-        env:
-        - name: ENVIRONMENT
-          value: "{{ .Values.env.ENVIRONMENT }}"
+            - name: DEPLOY_TIME
+              value: "{{ .Values.env.DEPLOY_TIME }}"
 
-        - name: APP_VERSION
-          value: "{{ .Values.env.APP_VERSION }}"
+            - name: ENVIRONMENT
+              value: "{{ .Values.env.ENVIRONMENT }}"
 
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 5000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
 
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 5000
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
