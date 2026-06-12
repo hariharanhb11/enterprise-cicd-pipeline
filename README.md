@@ -1,23 +1,26 @@
-# 🚀 Enterprise CI/CD Pipeline
+# Complete CI/CD Pipeline Deployed on Amazon EKS
 
-## Project Overview
+## Overview
 
-This project implements an **Enterprise CI/CD Pipeline** using:
+This project demonstrates a complete end-to-end CI/CD pipeline for a Python Flask application using modern DevSecOps practices. The pipeline automates code validation, quality analysis, security scanning, containerization, image management, and Kubernetes deployment on Amazon EKS.
 
-* GitHub Actions
-* SonarQube
-* Pytest
-* Docker
-* Trivy
-* AWS ECR
-* Amazon EKS
-* Helm
+### Key Features
 
-The pipeline automatically builds, tests, scans, containerizes, and deploys a Python Flask application to Kubernetes whenever code is pushed to GitHub.
+* Automated CI/CD with GitHub Actions
+* Unit Testing using Pytest
+* Static Code Analysis with SonarQube
+* Docker Image Build and Packaging
+* Container Vulnerability Scanning using Trivy
+* Image Storage in Amazon ECR
+* Kubernetes Deployment on Amazon EKS
+* Helm-Based Release Management
+* LoadBalancer Service Exposure
+* Rollback and Version Management
+* Environment-Specific Configuration Support
 
 ---
 
-# Architecture
+## Architecture
 
 ```text
 ┌─────────────┐
@@ -54,33 +57,79 @@ The pipeline automatically builds, tests, scans, containerizes, and deploys a Py
           │
           ▼
 ┌─────────────────────┐
-│    Application      │
+│ Flask Application   │
 └─────────────────────┘
 ```
 
 ---
 
-# Technologies Used
+## Technology Stack
 
-| Tool           | Purpose                    |
-| -------------- | -------------------------- |
-| Python Flask   | Application Development    |
-| GitHub         | Source Control             |
-| GitHub Actions | CI/CD Automation           |
-| SonarQube      | Code Quality Analysis      |
-| Pytest         | Unit Testing               |
-| Docker         | Containerization           |
-| Trivy          | Security Scanning          |
-| AWS ECR        | Image Registry             |
-| Amazon EKS     | Kubernetes Platform        |
-| Helm           | Kubernetes Package Manager |
+| Category            | Technology     |
+| ------------------- | -------------- |
+| Source Control      | GitHub         |
+| CI/CD               | GitHub Actions |
+| Application         | Python Flask   |
+| Testing             | Pytest         |
+| Code Quality        | SonarQube      |
+| Containerization    | Docker         |
+| Security Scanning   | Trivy          |
+| Container Registry  | Amazon ECR     |
+| Kubernetes Platform | Amazon EKS     |
+| Package Management  | Helm           |
+| Cloud Provider      | AWS            |
 
 ---
 
-# Project Structure
+## CI/CD Workflow
+
+### 1. Source Code Commit
+
+Developers push code changes to GitHub.
+
+### 2. Automated Testing
+
+Pytest executes unit tests to validate application functionality.
+
+### 3. Code Quality Analysis
+
+SonarQube performs:
+
+* Static Code Analysis
+* Security Checks
+* Code Smell Detection
+* Maintainability Review
+
+### 4. Container Build
+
+Docker creates a deployable application image.
+
+### 5. Security Scan
+
+Trivy scans the Docker image for:
+
+* Critical Vulnerabilities
+* High Severity Issues
+* Dependency Risks
+
+### 6. Push to Amazon ECR
+
+The validated image is pushed to Amazon Elastic Container Registry.
+
+### 7. Deployment to Amazon EKS
+
+Helm deploys the latest application version to the Kubernetes cluster.
+
+### 8. Application Exposure
+
+A Kubernetes LoadBalancer Service exposes the application externally.
+
+---
+
+## Project Structure
 
 ```text
-enterprise-cicd-pipeline
+complete-cicd-pipeline-eks
 │
 ├── .github/
 │   └── workflows/
@@ -108,175 +157,15 @@ enterprise-cicd-pipeline
 
 ---
 
-# CI/CD Pipeline Flow
-
-## 1. Code Commit
-
-Developer pushes code to GitHub.
-
-```bash
-git add .
-git commit -m "Updated application"
-git push origin main
-```
-
----
-
-## 2. Unit Testing
-
-GitHub Actions executes:
-
-```bash
-pytest app/test_app.py
-```
-
-Validates application functionality before deployment.
-
----
-
-## 3. SonarQube Scan
-
-Performs:
-
-* Code Quality Analysis
-* Security Analysis
-* Code Smell Detection
-
----
-
-## 4. Docker Build
-
-Creates Docker image:
-
-```bash
-docker build -t enterprise-cicd-app .
-```
-
----
-
-## 5. Trivy Security Scan
-
-Scans Docker image for:
-
-* Critical Vulnerabilities
-* High Vulnerabilities
-* Dependency Issues
-
----
-
-## 6. Push Image to ECR
-
-Pushes image to Amazon ECR.
-
-Example:
-
-```text
-449499558261.dkr.ecr.us-east-1.amazonaws.com/enterprise-cicd-app
-```
-
----
-
-## 7. Deploy to Amazon EKS
-
-Helm deploys the application:
+## Deployment Command
 
 ```bash
 helm upgrade --install myapp ./helm/myapp
 ```
 
-Creates:
-
-* Deployment
-* Pods
-* Service
-
 ---
 
-## 8. Load Balancer Access
-
-Application becomes available through AWS Load Balancer.
-
-```bash
-kubectl get svc
-```
-
----
-
-# Helm Components
-
-## Chart.yaml
-
-Defines Helm chart metadata.
-
-## values.yaml
-
-Stores configurable values:
-
-```yaml
-replicaCount: 2
-
-image:
-  repository: enterprise-cicd-app
-  tag: latest
-
-containerPort: 5000
-```
-
-## deployment.yaml
-
-Creates Kubernetes Deployment.
-
-Responsible for:
-
-* Pods
-* Replicas
-* Rolling Updates
-
-## service.yaml
-
-Creates Kubernetes Service.
-
-```yaml
-type: LoadBalancer
-```
-
-Provides external access to the application.
-
----
-
-# Rollback Capability
-
-View deployment history:
-
-```bash
-helm history myapp
-```
-
-Rollback to a previous release:
-
-```bash
-helm rollback myapp 1
-```
-
----
-
-# Environment Configuration
-
-Environment values are passed during deployment.
-
-Example:
-
-```text
-ENVIRONMENT=Production
-APP_VERSION=1.0.0
-DEPLOY_TIME=2026-06-12
-```
-
-Displayed on the application UI.
-
----
-
-# Verification Commands
+## Verification Commands
 
 ### Check Pods
 
@@ -290,7 +179,7 @@ kubectl get pods
 kubectl get svc
 ```
 
-### Check Deployment
+### Check Deployments
 
 ```bash
 kubectl get deployment
@@ -304,21 +193,38 @@ helm list
 
 ---
 
-# Project Deliverables
+## Rollback Deployment
 
-* ✅ GitHub Actions CI/CD Pipeline
-* ✅ SonarQube Integration
-* ✅ Trivy Security Scan
-* ✅ Docker Image Creation
-* ✅ AWS ECR Integration
-* ✅ Amazon EKS Deployment
-* ✅ Helm-Based Deployment
-* ✅ Environment-Specific Configuration
-* ✅ Rollback Capability
-* ✅ Automated Smoke Test
+View release history:
+
+```bash
+helm history myapp
+```
+
+Rollback to a previous version:
+
+```bash
+helm rollback myapp 1
+```
 
 ---
 
-# Author
+## Deliverables
 
-Enterprise CI/CD Pipeline using GitHub Actions, Docker, SonarQube, Trivy, AWS ECR, Amazon EKS, and Helm.
+* ✅ GitHub Actions CI/CD Pipeline
+* ✅ Pytest Unit Testing
+* ✅ SonarQube Code Analysis
+* ✅ Docker Image Build
+* ✅ Trivy Vulnerability Scanning
+* ✅ Amazon ECR Integration
+* ✅ Amazon EKS Deployment
+* ✅ Helm Release Management
+* ✅ LoadBalancer Exposure
+* ✅ Rollback Capability
+* ✅ DevSecOps Best Practices
+
+---
+
+## Outcome
+
+This project demonstrates a production-style DevSecOps workflow where every code change is automatically tested, scanned, containerized, and deployed to Amazon EKS through a fully automated CI/CD pipeline.
